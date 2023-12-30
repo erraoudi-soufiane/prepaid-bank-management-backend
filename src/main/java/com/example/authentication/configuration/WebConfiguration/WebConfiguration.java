@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -28,17 +29,20 @@ public class WebConfiguration {
 
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
-
+    @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
         http.sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.headers(headers -> headers.disable());
-        http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated());
         http.formLogin(f -> f.permitAll());
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("api/users", "api/user/save").hasRole("ADMIN").anyRequest().authenticated());
+        http.exceptionHandling((exception)-> exception.accessDeniedHandler(accessDeniedHandler));
         http.userDetailsService(userDetailServiceImpl);
         http.addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration)));
         http.addFilterBefore(new JwtAuthorizationFilter(),UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
 
     }
