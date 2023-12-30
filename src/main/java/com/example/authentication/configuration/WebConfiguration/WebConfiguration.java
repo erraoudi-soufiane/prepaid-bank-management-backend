@@ -29,8 +29,6 @@ public class WebConfiguration {
 
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
-    @Autowired
-    private CustomAccessDeniedHandler accessDeniedHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
@@ -38,7 +36,6 @@ public class WebConfiguration {
         http.headers(headers -> headers.disable());
         http.formLogin(f -> f.permitAll());
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("api/users", "api/user/save").hasRole("ADMIN").anyRequest().authenticated());
-        http.exceptionHandling((exception)-> exception.accessDeniedHandler(accessDeniedHandler));
         http.userDetailsService(userDetailServiceImpl);
         http.addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration)));
         http.addFilterBefore(new JwtAuthorizationFilter(),UsernamePasswordAuthenticationFilter.class);
