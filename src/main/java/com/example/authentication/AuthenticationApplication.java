@@ -8,6 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 @SpringBootApplication
 @EnableMethodSecurity(prePostEnabled = true)
 public class AuthenticationApplication {
@@ -15,6 +19,7 @@ public class AuthenticationApplication {
     public static void main(String[] args) {
         SpringApplication.run(AuthenticationApplication.class, args);
     }
+
     @Bean
     CommandLineRunner run(UserService userService){
         return args -> {
@@ -27,4 +32,15 @@ public class AuthenticationApplication {
         };
     }
 
+    @Configuration
+    public class CorsConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry.addMapping("/**")
+                    .allowedOrigins("http://localhost:5173")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE")
+                    .allowCredentials(true);
+        }
+    }
 }
